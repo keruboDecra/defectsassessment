@@ -37,7 +37,6 @@ def main():
 
         # Create a path for the temporary image
         temp_path = os.path.join(temp_dir, 'temp_image.jpg')
-
         uploaded_file.seek(0)
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
@@ -51,14 +50,17 @@ def main():
         # Display the results
         st.subheader("Prediction Results:")
         classes = ["Crazing", "Inclusion", "Patches", "Pitted", "Rolled", "Scratches"]
-        for i, class_name in enumerate(classes):
-            st.write(f"{class_name}: {prediction[0][i]}")
+        max_prob_class = classes[np.argmax(prediction)]
+        max_prob = np.max(prediction)
 
         # Set a threshold for alerting
         threshold = 0.5
-        max_prob = max(prediction[0])
-        if max_prob < threshold:
-            st.warning("No relevant defect found. Please check the image again.")
+
+        if max_prob_class.lower() == "metal" and max_prob > threshold:
+            for i, class_name in enumerate(classes):
+                st.write(f"{class_name}: {prediction[0][i]}")
+        else:
+            st.warning("No relevant metal defect found. Please check the image again.")
 
 # Run the app
 if __name__ == '__main__':
