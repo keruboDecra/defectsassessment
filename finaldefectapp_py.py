@@ -3,7 +3,6 @@ import streamlit as st
 import os
 from pathlib import Path
 from keras.preprocessing import image
-import matplotlib.pyplot as plt
 import numpy as np
 from keras.models import load_model
 
