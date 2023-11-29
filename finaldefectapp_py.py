@@ -18,7 +18,7 @@ def predict_defect(image_path, model):
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 
     prediction = model.predict(img_array)
-    return prediction
+    return prediction[0]
 
 # Streamlit App
 def main():
@@ -46,19 +46,20 @@ def main():
         # Make predictions
         prediction = predict_defect(temp_path, model)
 
-        # Display the results
+        # Display the predicted class and probability
         st.subheader("Prediction Results:")
         classes = ["Crazing", "Inclusion", "Patches", "Pitted", "Rolled", "Scratches"]
         max_prob_class = classes[np.argmax(prediction)]
         max_prob = np.max(prediction)
 
+        st.write(f"Predicted Class: {max_prob_class}")
+        st.write(f"Predicted Probability: {max_prob}")
+
         # Set a threshold for alerting
         threshold = 0.5
 
-        if max_prob_class.lower() == "metal":
+        if max_prob > threshold:
             st.success("Metal surface detected. Image is relevant for defect assessment.")
-            for i, class_name in enumerate(classes):
-                st.write(f"{class_name}: {prediction[0][i]}")
         else:
             st.warning("No relevant metal defect found. Please check the image again.")
 
