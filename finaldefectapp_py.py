@@ -61,7 +61,7 @@ def main():
 
         # Get and display the highest probability class
         highest_prob_class = get_highest_probability_class(prediction[0], classes)
-        st.subheader(f"Highest Probability Class: {highest_prob_class}")
+        st.subheader(f"This metal surface has a defect of: {highest_prob_class}")
 
         # Set a threshold for alerting
         threshold = 0.5
