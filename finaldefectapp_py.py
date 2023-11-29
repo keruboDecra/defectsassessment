@@ -1,6 +1,7 @@
 # Importing necessary libraries
 import streamlit as st
 import os
+from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
@@ -18,7 +19,7 @@ def predict_defect(image_path, model):
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 
     prediction = model.predict(img_array)
-    return prediction[0]
+    return prediction
 
 # Streamlit App
 def main():
@@ -36,6 +37,7 @@ def main():
 
         # Create a path for the temporary image
         temp_path = os.path.join(temp_dir, 'temp_image.jpg')
+
         uploaded_file.seek(0)
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
@@ -46,22 +48,17 @@ def main():
         # Make predictions
         prediction = predict_defect(temp_path, model)
 
-        # Display the predicted class and probability
+        # Display the results
         st.subheader("Prediction Results:")
         classes = ["Crazing", "Inclusion", "Patches", "Pitted", "Rolled", "Scratches"]
-        max_prob_class = classes[np.argmax(prediction)]
-        max_prob = np.max(prediction)
-
-        st.write(f"Predicted Class: {max_prob_class}")
-        st.write(f"Predicted Probability: {max_prob}")
+        for i, class_name in enumerate(classes):
+            st.write(f"{class_name}: {prediction[0][i]}")
 
         # Set a threshold for alerting
         threshold = 0.5
-
-        if max_prob > threshold:
-            st.success("Metal surface detected. Image is relevant for defect assessment.")
-        else:
-            st.warning("No relevant metal defect found. Please check the image again.")
+        max_prob = max(prediction[0])
+        if max_prob < threshold:
+            st.warning("No relevant defect found. Please check the image again.")
 
 # Run the app
 if __name__ == '__main__':
