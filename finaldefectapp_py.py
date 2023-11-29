@@ -1,42 +1,55 @@
 # Import necessary libraries
-import streamlit as st
 from keras.preprocessing import image
 from keras.models import load_model
-import numpy as np
+from PIL import Image
 
 # Load the trained MobileNet model
 model = 'mobilenet_model(1).h5'
 
-# Function to preprocess an image for prediction
-def preprocess_image(img_path, target_size=(150, 150)):
-    img = image.load_img(img_path, target_size=target_size)
+# Define the image size for model input
+img_width, img_height = 150, 150
+
+# Function for image preprocessing
+def preprocess_image(img):
+    # Resize the image to the required dimensions
+    img = img.resize((img_width, img_height))
+    # Convert the image to a numpy array
     img_array = image.img_to_array(img)
+    # Expand the dimensions to create a batch of size 1
     img_array = np.expand_dims(img_array, axis=0)
-    img_array /= 255.0  # Normalize pixel values
+    # Normalize pixel values to the range [0, 1]
+    img_array /= 255.0
     return img_array
 
-# Streamlit app
-st.title("Defect Classification App")
+# Function for model prediction
+def predict_defect(image_path):
+    # Load and preprocess the image
+    img = Image.open(image_path)
+    img_array = preprocess_image(img)
+    
+    # Make predictions
+    predictions = model.predict(img_array)
+    # Get the class with the highest probability
+    predicted_class = np.argmax(predictions)
+    
+    return predicted_class
 
-# File uploader
+# Streamlit user interface
+st.title("Defect Assessment App")
+
+# Upload image through the Streamlit interface
 uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
 # Display the uploaded image
 if uploaded_file is not None:
-    st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
+    st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
-    # Make a prediction
-    st.write("")
-    st.write("Classifying...")
+    # Make predictions when the "Predict" button is clicked
+    if st.button("Predict"):
+        # Get the predictions
+        prediction = predict_defect(uploaded_file)
 
-    # Preprocess the image
-    img_array = preprocess_image(uploaded_file)
-
-    # Make prediction
-    prediction = model.predict(img_array)
-
-    # Get the class labels
-    classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-
-    # Display the prediction result
-    st.write(f"Prediction: {classes[np.argmax(prediction)]}")
+        # Display the prediction result
+        defect_classes = ["Crazing", "Inclusion", "Patches", "Pitted", "Rolled", "Scratches"]
+        result = f"The predicted defect class is: {defect_classes[prediction]}"
+        st.success(result)
