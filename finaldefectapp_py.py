@@ -28,15 +28,20 @@ def predict_defect(image_path, model):
 
 # Function to assess the highest probability predicted and print out the class of the image
 def assess_defect(prediction, classes, threshold):
+    if len(prediction) != len(classes):
+        st.error("Unexpected prediction shape. Please check the model output.")
+        return
+
     max_prob_index = np.argmax(prediction)
     max_prob_class = classes[max_prob_index]
 
     st.subheader("Prediction Results:")
     for i, class_name in enumerate(classes):
-        st.write(f"{class_name}: {prediction[0][i]}")
+        prob = prediction[i] if i < len(prediction) else 0.0
+        st.write(f"{class_name}: {prob}")
 
-    if prediction[0][max_prob_index] >= threshold:
-        st.success(f"This metal surface has a defect of: {max_prob_class} with probability {prediction[0][max_prob_index]:.2f}")
+    if prediction[max_prob_index] >= threshold:
+        st.success(f"This metal surface has a defect of: {max_prob_class} with probability {prediction[max_prob_index]:.2f}")
     else:
         st.warning("No relevant defect found. Please check the image again.")
 
@@ -67,9 +72,8 @@ def main():
             # Make predictions
             prediction = predict_defect(temp_path, model)
 
-            # Assess the highest probability predicted and print out the class
-            threshold = 0.95  # Set your chosen threshold
-            assess_defect(prediction[0], classes, threshold)
+            # Display the results
+            assess_defect(prediction[0], classes, threshold=1)  # You can adjust the threshold
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
