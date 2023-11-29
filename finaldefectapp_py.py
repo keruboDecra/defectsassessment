@@ -5,8 +5,7 @@ from keras.models import load_model
 import numpy as np
 
 # Load the trained MobileNet model
-model_path = 'mobilenet_model(1).h5'
-model = load_model(model_path)
+model = 'mobilenet_model(1).h5'
 
 # Function to preprocess an image for prediction
 def preprocess_image(img_path, target_size=(150, 150)):
