@@ -9,7 +9,7 @@ from keras.models import load_model
 
 # Function to load the trained MobileNet model
 def load_mobilenet_model():
-    model_path = '/content/drive/My Drive/defect model/mobilenet_model.h5'
+    model_path = 'mobilenet_model (1).h5'
     model = load_model(model_path)
     return model
 
