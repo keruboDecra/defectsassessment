@@ -27,23 +27,10 @@ def predict_defect(image_path, model):
     return prediction
 
 # Function to assess the highest probability predicted and print out the class of the image
-def assess_defect(prediction, classes, threshold):
-    if len(prediction) != len(classes):
-        st.error("Unexpected prediction shape. Please check the model output.")
-        return
-
+def assess_defect(prediction, classes):
     max_prob_index = np.argmax(prediction)
     max_prob_class = classes[max_prob_index]
-
-    st.subheader("Prediction Results:")
-    for i, class_name in enumerate(classes):
-        prob = prediction[i] if i < len(prediction) else 0.0
-        st.write(f"{class_name}: {prob}")
-
-    if prediction[max_prob_index] >= threshold:
-        st.success(f"This metal surface has a defect of: {max_prob_class} with probability {prediction[max_prob_index]:.2f}")
-    else:
-        st.warning("No relevant defect found. Please check the image again.")
+    return max_prob_class
 
 # Streamlit App
 def main():
@@ -73,7 +60,19 @@ def main():
             prediction = predict_defect(temp_path, model)
 
             # Display the results
-            assess_defect(prediction[0], classes, threshold=1)  # You can adjust the threshold
+            st.subheader("Prediction Results:")
+            for i, class_name in enumerate(classes):
+                st.write(f"{class_name}: {prediction[0][i]}")
+
+            # Assess the highest probability predicted and print out the class
+            max_prob_class = assess_defect(prediction[0], classes)
+            st.success(f"This metal surface has a defect of: {max_prob_class}")
+
+            # Set a threshold for alerting
+            threshold = 1 # Set your chosen threshold
+            max_prob = max(prediction[0])
+            if max_prob < threshold:
+                st.warning("No relevant defect found. Please check the image again.")
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
