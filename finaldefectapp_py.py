@@ -69,7 +69,7 @@ def main():
             st.success(f"This metal surface has a defect of: {max_prob_class}")
 
             # Set a threshold for alerting
-            threshold = 2  # Set your chosen threshold
+            threshold = 0.3  # Set your chosen threshold
             max_prob = max(prediction[0])
             if max_prob < threshold:
                 st.warning("No relevant defect found. Please check the image again.")
