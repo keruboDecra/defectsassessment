@@ -6,8 +6,16 @@ from keras.preprocessing import image
 import numpy as np
 
 # Load the trained model
-model = 'mobilenet_model(1).h5'  # Update with the actual path
+# Load the trained model
+model_filename = 'mobilenet_model(1).h5'  # Update with your actual model file name
+model_path = os.path.join(os.path.dirname(__file__), model_filename)
 
+try:
+    model = load_model(model_path)
+    st.write(f"Model loaded successfully: {model_filename}")
+except Exception as e:
+    st.error(f"Error loading the model: {e}")
+    st.stop()
 
 
 # Define the defect classes
@@ -27,7 +35,12 @@ def predict_defect(image_path):
     processed_img = preprocess_image(image_path)
 
     # Make prediction
-    prediction = model.predict(processed_img)
+    try:
+        prediction = model.predict(processed_img)
+        st.write(f"Prediction shape: {prediction.shape}")
+    except Exception as e:
+        st.error(f"Error making prediction: {e}")
+        st.stop()
 
     # Get the predicted class
     predicted_class = classes[np.argmax(prediction)]
