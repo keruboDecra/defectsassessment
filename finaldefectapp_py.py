@@ -1,7 +1,6 @@
 # Importing necessary libraries
 import streamlit as st
 import os
-from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
@@ -17,14 +16,19 @@ def predict_defect(image_path, model):
     img = image.load_img(image_path, target_size=(150, 150))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0
-
     prediction = model.predict(img_array)
     return prediction
 
-# Function to get the class with the highest probability
-def get_highest_probability_class(prediction, classes):
+# Function to assess the highest probability predicted
+def assess_highest_probability(prediction, threshold):
     max_prob_index = np.argmax(prediction)
-    return classes[max_prob_index]
+    max_prob = prediction[0][max_prob_index]
+
+    if max_prob < threshold:
+        st.warning("No relevant defect found. Please check the image again.")
+    else:
+        defect_class = classes[max_prob_index]
+        st.write(f"This metal surface has a defect of {defect_class} with probability {max_prob}")
 
 # Streamlit App
 def main():
@@ -42,7 +46,6 @@ def main():
 
         # Create a path for the temporary image
         temp_path = os.path.join(temp_dir, 'temp_image.jpg')
-
         uploaded_file.seek(0)
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
@@ -55,23 +58,11 @@ def main():
 
         # Display the results
         st.subheader("Prediction Results:")
-        classes = ["Crazing", "Inclusion", "Patches", "Pitted", "Rolled", "Scratches"]
-        for i, class_name in enumerate(classes):
-            st.write(f"{class_name}: {prediction[0][i]}")
-
-        # Get and display the highest probability class
-        highest_prob_class = get_highest_probability_class(prediction[0], classes)
-        st.subheader(f"Highest Probability Class: {highest_prob_class}")
-
-        # Display the message about the metal surface defect
-        st.success(f"This metal surface has a defect of {highest_prob_class.lower()}.")
-
-        # Set a threshold for alerting
-        threshold = 0.5
-        max_prob = max(prediction[0])
-        if max_prob < threshold:
-            st.warning("No relevant defect found. Please check the image again.")
+        assess_highest_probability(prediction, threshold=0.5)
 
 # Run the app
 if __name__ == '__main__':
+    # Define the classes based on your training data
+    classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
+
     main()
