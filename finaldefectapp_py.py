@@ -1,6 +1,7 @@
 # Importing necessary libraries
 import streamlit as st
 import os
+from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
@@ -20,6 +21,11 @@ def predict_defect(image_path, model):
     prediction = model.predict(img_array)
     return prediction
 
+# Function to get the class with the highest probability
+def get_highest_probability_class(prediction, classes):
+    max_prob_index = np.argmax(prediction)
+    return classes[max_prob_index]
+
 # Streamlit App
 def main():
     st.title("Defects Assessment App")
@@ -36,6 +42,7 @@ def main():
 
         # Create a path for the temporary image
         temp_path = os.path.join(temp_dir, 'temp_image.jpg')
+
         uploaded_file.seek(0)
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
@@ -49,19 +56,17 @@ def main():
         # Display the results
         st.subheader("Prediction Results:")
         classes = ["Crazing", "Inclusion", "Patches", "Pitted", "Rolled", "Scratches"]
+        for i, class_name in enumerate(classes):
+            st.write(f"{class_name}: {prediction[0][i]}")
 
-        # Get the index of the class with the highest probability
-        predicted_class_index = np.argmax(prediction)
-
-        # Print the class and probability
-        predicted_class = classes[predicted_class_index]
-        predicted_probability = prediction[0][predicted_class_index]
-
-        st.write(f"The defect belongs to class {predicted_class} with probability: {predicted_probability}")
+        # Get and display the highest probability class
+        highest_prob_class = get_highest_probability_class(prediction[0], classes)
+        st.subheader(f"Highest Probability Class: {highest_prob_class}")
 
         # Set a threshold for alerting
         threshold = 0.5
-        if predicted_probability < threshold:
+        max_prob = max(prediction[0])
+        if max_prob < threshold:
             st.warning("No relevant defect found. Please check the image again.")
 
 # Run the app
