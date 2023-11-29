@@ -1,7 +1,6 @@
 # Importing necessary libraries
 import streamlit as st
 import os
-from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
@@ -56,7 +55,8 @@ def main():
         # Set a threshold for alerting
         threshold = 0.5
 
-        if max_prob_class.lower() == "metal" and max_prob > threshold:
+        if max_prob_class.lower() == "metal":
+            st.success("Metal surface detected. Image is relevant for defect assessment.")
             for i, class_name in enumerate(classes):
                 st.write(f"{class_name}: {prediction[0][i]}")
         else:
