@@ -32,10 +32,12 @@ def main():
     if uploaded_file is not None:
         st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
-        # Save the uploaded image to a temporary directory
-        temp_dir = '/content/temp/'
-        os.makedirs("my_temp_dir", exist_ok=True)
-        temp_path = os.path.join(temp_dir, 'temp_image.jpg')
+    # Create a temporary directory if it doesn't exist
+    temp_dir = 'temp'
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # Create a path for the temporary image
+    temp_path = os.path.join(temp_dir, 'temp_image.jpg')
         uploaded_file.seek(0)
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
