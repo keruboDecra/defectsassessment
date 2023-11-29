@@ -7,11 +7,10 @@ import numpy as np
 
 # Load the trained model
 # Load the trained model
-model_filename = 'mobilenet_model(1).h5'  # Update with your actual model file name
-model_path = os.path.join(os.path.dirname(__file__), model_filename)
+model = 'mobilenet_model(1).h5'  # Update with your actual model file name
 
 try:
-    model = load_model(model_path)
+    model = 'mobilenet_model(1).h5'
     st.write(f"Model loaded successfully: {model_filename}")
 except Exception as e:
     st.error(f"Error loading the model: {e}")
