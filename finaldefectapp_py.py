@@ -11,7 +11,7 @@ model = 'mobilenet_model(1).h5'  # Update with your actual model file name
 
 try:
     model = 'mobilenet_model(1).h5'
-    st.write(f"Model loaded successfully: {model_filename}")
+    st.write(f"Model loaded successfully")
 except Exception as e:
     st.error(f"Error loading the model: {e}")
     st.stop()
