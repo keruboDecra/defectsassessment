@@ -12,6 +12,7 @@ def load_mobilenet_model():
     model = load_model(model_path)
     return model
 
+
 # Function to make predictions
 def predict_defect(image_path, model):
     img = image.load_img(image_path, target_size=(150, 150))
@@ -33,7 +34,7 @@ def main():
 
         # Save the uploaded image to a temporary directory
         temp_dir = '/content/temp/'
-        os.makedirs(temp_dir, exist_ok=True)
+        os.makedirs("my_temp_dir", exist_ok=True)
         temp_path = os.path.join(temp_dir, 'temp_image.jpg')
         uploaded_file.seek(0)
         with open(temp_path, 'wb') as f:
