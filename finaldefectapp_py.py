@@ -8,11 +8,7 @@ import numpy as np
 # Load the trained model
 model = 'mobilenet_model(1).h5'  # Update with the actual path
 
-try:
-    model = load_model(model_path)
-except Exception as e:
-    st.error(f"Error loading the model: {e}")
-    st.stop()
+
 
 # Define the defect classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
