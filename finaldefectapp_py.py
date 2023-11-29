@@ -70,7 +70,7 @@ def main():
 
             # Set a threshold for alerting
             threshold = 1 # Set your chosen threshold
-            max_prob = max(prediction[0])
+            max_prob = max(prediction[0.92])
             if max_prob < threshold:
                 st.warning("No relevant defect found. Please check the image again.")
 
