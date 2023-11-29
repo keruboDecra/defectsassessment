@@ -1,67 +1,61 @@
-# Import necessary libraries
+# Importing necessary libraries
 import streamlit as st
 import os
-from keras.models import load_model
+from pathlib import Path
 from keras.preprocessing import image
+import matplotlib.pyplot as plt
 import numpy as np
+from keras.models import load_model
 
-# Load the trained model
-# Load the trained model
-model = 'mobilenet_model(1).h5'  # Update with your actual model file name
-
-try:
-    model = 'mobilenet_model(1).h5'
-    st.write(f"Model loaded successfully")
-except Exception as e:
-    st.error(f"Error loading the model: {e}")
-    st.stop()
-
-
-# Define the defect classes
-classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-
-# Function to preprocess the input image
-def preprocess_image(img_path, target_size=(150, 150)):
-    img = image.load_img(img_path, target_size=target_size)
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array /= 255.0  # Normalize pixel values
-    return img_array
+# Function to load the trained MobileNet model
+def load_mobilenet_model():
+    model_path = '/content/drive/My Drive/defect model/mobilenet_model.h5'
+    model = load_model(model_path)
+    return model
 
 # Function to make predictions
-def predict_defect(image_path):
-    # Preprocess the input image
-    processed_img = preprocess_image(image_path)
+def predict_defect(image_path, model):
+    img = image.load_img(image_path, target_size=(150, 150))
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
 
-    # Make prediction
-    try:
-        prediction = model.predict(processed_img)
-        st.write(f"Prediction shape: {prediction.shape}")
-    except Exception as e:
-        st.error(f"Error making prediction: {e}")
-        st.stop()
+    prediction = model.predict(img_array)
+    return prediction
 
-    # Get the predicted class
-    predicted_class = classes[np.argmax(prediction)]
-
-    return predicted_class
-
-# Streamlit app
+# Streamlit App
 def main():
     st.title("Defects Assessment App")
-    st.write("Upload an image to assess defects.")
 
     # Upload image through Streamlit
     uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
     if uploaded_file is not None:
-        # Display the uploaded image
-        st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
+        st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
-        # Make prediction
-        predicted_class = predict_defect(uploaded_file)
+        # Save the uploaded image to a temporary directory
+        temp_dir = '/content/temp/'
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_path = os.path.join(temp_dir, 'temp_image.jpg')
+        uploaded_file.seek(0)
+        with open(temp_path, 'wb') as f:
+            f.write(uploaded_file.read())
 
-        st.write(f"Prediction: {predicted_class}")
+        # Load the model
+        model = load_mobilenet_model()
+
+        # Make predictions
+        prediction = predict_defect(temp_path, model)
+
+        # Display the results
+        st.subheader("Prediction Results:")
+        for i, class_name in enumerate(classes):
+            st.write(f"{class_name}: {prediction[0][i]}")
+
+        # Set a threshold for alerting
+        threshold = 0.5
+        max_prob = max(prediction[0])
+        if max_prob < threshold:
+            st.warning("No relevant defect found. Please check the image again.")
 
 # Run the app
 if __name__ == '__main__':
