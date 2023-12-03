@@ -46,7 +46,6 @@ def assess_defect(prediction, classes):
 
 
 # Function to check if the uploaded image is relevant to the task
-import cv2
 import numpy as np
 
 def is_relevant_image(image_path, gray_threshold=0.8):
