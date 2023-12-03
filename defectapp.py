@@ -6,7 +6,7 @@ from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
 import pandas as pd
-import cv2
+
 
 # Function to load the trained MobileNet model
 def load_mobilenet_model():
