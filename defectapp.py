@@ -52,7 +52,8 @@ def main():
         os.makedirs(temp_dir, exist_ok=True)
 
         # Create a path for the temporary image
-        temp_path = os.path.join(temp_dir, 'temp_image.jpg' if uploaded_file.type == 'image/jpeg' else 'temp_image.bmp')  # Adjust file extension
+        filename = uploaded_file.name
+        temp_path = os.path.join(temp_dir, filename)
 
         uploaded_file.seek(0)
         with open(temp_path, 'wb') as f:
@@ -71,14 +72,14 @@ def main():
             # Set the threshold for alerting
             max_prob = max(prediction[0])
             if max_prob < threshold or max_prob_class == "Non-Metal":
-                st.warning("This is likely not a metallic surface, please check the image again.")
+                st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
             else:
                 # Display the detailed prediction results only if it's a defect class
-                st.subheader("Prediction Results:")
+                st.subheader(f"Prediction Results for {filename}:")
                 for i, class_name in enumerate(classes):
                     st.write(f"{class_name}: {prediction[0][i]}")
 
-                st.success(f"This metal surface has a defect of: {max_prob_class}")
+                st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
