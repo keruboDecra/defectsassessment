@@ -36,10 +36,11 @@ def assess_defect(prediction, classes):
 def main():
     st.title("Defects Assessment App")
 
-    # Display sample images
-    sample_images = ['Crazing.bmp', 'inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
-    for sample_image in sample_images:
-        if st.button(f"Use {sample_image}"):
+    # Display sample images horizontally
+    sample_images = ['Crazing.bmp', 'Inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
+    sample_columns = st.beta_columns(len(sample_images))
+    for col, sample_image in zip(sample_columns, sample_images):
+        if col.button(f"Use {sample_image}"):
             process_sample_image(sample_image)
 
     # Upload image through Streamlit
