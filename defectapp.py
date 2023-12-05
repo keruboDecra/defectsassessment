@@ -40,57 +40,64 @@ def main():
 
     # Display sample images horizontally
     sample_images = ['Crazing.bmp', 'inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
-    sample_columns = st.columns(len(sample_images))
-    for col, sample_image in zip(sample_columns, sample_images):
-        img_path = os.path.join(os.getcwd(), sample_image)
-        col.image(img_path, caption=f"Use {sample_image}", use_column_width=True)
-        if col.button(f"Use {sample_image}"):
-            process_sample_image(sample_image)
+    
+    # Set width for both sections
+    column_width = st.beta_columns([1, 2])[1].width
 
-    # Or upload a file here
-    uploaded_file = st.file_uploader("Or upload a file here...", type=["jpg", "bmp"])  # Allow BMP files
+    # Sample images section
+    with st.beta_container():
+        sample_columns = st.columns(len(sample_images))
+        for col, sample_image in zip(sample_columns, sample_images):
+            img_path = os.path.join(os.getcwd(), sample_image)
+            col.image(img_path, caption=f"Use {sample_image}", use_column_width=True)
+            if col.button(f"Use {sample_image}"):
+                process_sample_image(sample_image)
 
-    # Add a sidebar for user inputs
-    with st.sidebar:
-        st.subheader("Threshold Settings")
-        threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
+    # Or upload a file here section
+    with st.beta_container():
+        uploaded_file = st.file_uploader("Or upload a file here...", type=["jpg", "bmp"], key="file_upload")  # Allow BMP files
 
-    if uploaded_file is not None:
-        st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
+        # Add a sidebar for user inputs
+        with st.sidebar:
+            st.subheader("Threshold Settings")
+            threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
 
-        # Create a temporary directory if it doesn't exist
-        temp_dir = 'temp'
-        os.makedirs(temp_dir, exist_ok=True)
+        if uploaded_file is not None:
+            st.image(uploaded_file, caption='Uploaded Image.', width=column_width)
 
-        # Create a path for the temporary image
-        filename = uploaded_file.name
-        temp_path = os.path.join(temp_dir, filename)
+            # Create a temporary directory if it doesn't exist
+            temp_dir = 'temp'
+            os.makedirs(temp_dir, exist_ok=True)
 
-        uploaded_file.seek(0)
-        with open(temp_path, 'wb') as f:
-            f.write(uploaded_file.read())
+            # Create a path for the temporary image
+            filename = uploaded_file.name
+            temp_path = os.path.join(temp_dir, filename)
 
-        # Load the model
-        model = load_mobilenet_model()
+            uploaded_file.seek(0)
+            with open(temp_path, 'wb') as f:
+                f.write(uploaded_file.read())
 
-        if model is not None:
-            # Make predictions
-            prediction = predict_defect(temp_path, model)
+            # Load the model
+            model = load_mobilenet_model()
 
-            # Assess the highest probability predicted and print out the class
-            max_prob_class = assess_defect(prediction[0], classes)
+            if model is not None:
+                # Make predictions
+                prediction = predict_defect(temp_path, model)
 
-            # Set the threshold for alerting
-            max_prob = max(prediction[0])
-            if max_prob < threshold or max_prob_class == "Non-Metal":
-                st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
-            else:
-                # Display the detailed prediction results only if it's a defect class
-                st.subheader(f"Prediction Results for {filename}:")
-                for i, class_name in enumerate(classes):
-                    st.write(f"{class_name}: {prediction[0][i]}")
+                # Assess the highest probability predicted and print out the class
+                max_prob_class = assess_defect(prediction[0], classes)
 
-                st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
+                # Set the threshold for alerting
+                max_prob = max(prediction[0])
+                if max_prob < threshold or max_prob_class == "Non-Metal":
+                    st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
+                else:
+                    # Display the detailed prediction results only if it's a defect class
+                    st.subheader(f"Prediction Results for {filename}:")
+                    for i, class_name in enumerate(classes):
+                        st.write(f"{class_name}: {prediction[0][i]}")
+
+                    st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
 
 # Function to process a sample image
 def process_sample_image(sample_image):
