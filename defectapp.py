@@ -65,11 +65,6 @@ def main():
             # Make predictions
             prediction = predict_defect(temp_path, model)
 
-            # Display the results
-            st.subheader("Prediction Results:")
-            for i, class_name in enumerate(classes):
-                st.write(f"{class_name}: {prediction[0][i]}")
-
             # Assess the highest probability predicted and print out the class
             max_prob_class = assess_defect(prediction[0], classes)
 
@@ -78,6 +73,11 @@ def main():
             if max_prob < threshold or max_prob_class == "Non-Metal":
                 st.warning("This is likely not a metallic surface, please check the image again.")
             else:
+                # Display the detailed prediction results only if it's a defect class
+                st.subheader("Prediction Results:")
+                for i, class_name in enumerate(classes):
+                    st.write(f"{class_name}: {prediction[0][i]}")
+
                 st.success(f"This metal surface has a defect of: {max_prob_class}")
 
 # Define your classes
