@@ -120,4 +120,9 @@ def process_sample_image(sample_image):
         st.success(f"This metal surface ({sample_image}) has a defect of: {max_prob_class}")
 
 # Define your classes
-classes = ['Crazing', 'Inclusion',
+classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
+
+# Run the app
+if __name__ == '__main__':
+    main()
+
