@@ -35,7 +35,7 @@ def assess_defect(prediction, classes):
 def is_grayscale(img_path):
     img = image.load_img(img_path)
     img_array = image.img_to_array(img)
-    return len(img_array.shape) == 2  # Check if the image has only one channel
+    return len(img_array.shape) == 4  # Check if the image has only one channel
 
 # Streamlit App
 def main():
