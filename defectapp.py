@@ -56,7 +56,7 @@ def main():
 
     # Or upload a file here
     st.subheader("Or upload a file here:")
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"], key="file_uploader")  # Allow BMP files
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg", "bmp"], key="file_uploader")  # Allow BMP files
 
     # Add a sidebar for user inputs
     with st.sidebar:
