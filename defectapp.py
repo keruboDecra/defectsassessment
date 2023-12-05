@@ -38,12 +38,34 @@ def main():
 
     # Display sample images horizontally
     sample_images = ['Crazing.bmp', 'inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
-    sample_columns = st.columns(len(sample_images))
-    for col, sample_image in zip(sample_columns, sample_images):
+    
+    # Define your classes
+    classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
+    
+    # Load the model
+    model = load_mobilenet_model()
+
+    if model is None:
+        st.warning("Model failed to load. Please check the logs for details.")
+        return
+
+    for sample_image in sample_images:
         img_path = os.path.join(os.getcwd(), sample_image)
-        col.image(img_path, caption=f"Use {sample_image}", use_column_width=True)
-        if col.button(f"Use {sample_image}"):
-            process_sample_image(sample_image)
+        img = image.load_img(img_path, target_size=(150, 150))
+        img_array = image.img_to_array(img) / 255.0
+        if st.button(f"Use {sample_image}", key=sample_image):
+            # Make predictions
+            prediction = model.predict(np.expand_dims(img_array, axis=0))
+
+            # Assess the highest probability predicted and print out the class
+            max_prob_class = assess_defect(prediction[0], classes)
+
+            # Display the detailed prediction results only if it's a defect class
+            st.subheader(f"Prediction Results for {sample_image}:")
+            for i, class_name in enumerate(classes):
+                st.write(f"{class_name}: {prediction[0][i]}")
+
+            st.success(f"This metal surface ({sample_image}) has a defect of: {max_prob_class}")
 
     # Upload image through Streamlit
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
@@ -68,61 +90,23 @@ def main():
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
 
-        # Load the model
-        model = load_mobilenet_model()
-
-        if model is not None:
-            # Make predictions
-            prediction = predict_defect(temp_path, model)
-
-            # Assess the highest probability predicted and print out the class
-            max_prob_class = assess_defect(prediction[0], classes)
-
-            # Set the threshold for alerting
-            max_prob = max(prediction[0])
-            if max_prob < threshold or max_prob_class == "Non-Metal":
-                st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
-            else:
-                # Display the detailed prediction results only if it's a defect class
-                st.subheader(f"Prediction Results for {filename}:")
-                for i, class_name in enumerate(classes):
-                    st.write(f"{class_name}: {prediction[0][i]}")
-
-                st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
-
-# Function to process a sample image
-def process_sample_image(sample_image):
-    # Load the model
-    model = load_mobilenet_model()
-
-    if model is not None:
-        # Create a temporary directory if it doesn't exist
-        temp_dir = 'temp'
-        os.makedirs(temp_dir, exist_ok=True)
-
-        # Create a path for the temporary image
-        temp_path = os.path.join(temp_dir, sample_image)
-
-        # Load the sample image
-        img_path = os.path.join(os.getcwd(), sample_image)
-        img = image.load_img(img_path, target_size=(150, 150))
-        img.save(temp_path)
-
         # Make predictions
         prediction = predict_defect(temp_path, model)
 
         # Assess the highest probability predicted and print out the class
         max_prob_class = assess_defect(prediction[0], classes)
 
-        # Display the detailed prediction results only if it's a defect class
-        st.subheader(f"Prediction Results for {sample_image}:")
-        for i, class_name in enumerate(classes):
-            st.write(f"{class_name}: {prediction[0][i]}")
+        # Set the threshold for alerting
+        max_prob = max(prediction[0])
+        if max_prob < threshold or max_prob_class == "Non-Metal":
+            st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
+        else:
+            # Display the detailed prediction results only if it's a defect class
+            st.subheader(f"Prediction Results for {filename}:")
+            for i, class_name in enumerate(classes):
+                st.write(f"{class_name}: {prediction[0][i]}")
 
-        st.success(f"This metal surface ({sample_image}) has a defect of: {max_prob_class}")
-
-# Define your classes
-classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
+            st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
 
 # Run the app
 if __name__ == '__main__':
