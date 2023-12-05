@@ -18,7 +18,7 @@ def load_mobilenet_model():
 
 # Function to make predictions
 def predict_defect(image_path, model):
-    img = image.load_img(image_path, target_size=(150, 150))
+    img = image.load_img(image_path, target_size=(150, 150), color_mode="grayscale")
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 
@@ -30,6 +30,12 @@ def assess_defect(prediction, classes):
     max_prob_index = np.argmax(prediction)
     max_prob_class = classes[max_prob_index]
     return max_prob_class
+
+# Function to check if the image is grayscale
+def is_grayscale(img_path):
+    img = image.load_img(img_path, target_size=(150, 150), color_mode="grayscale")
+    img_array = image.img_to_array(img)
+    return img_array.shape[-1] == 1
 
 # Streamlit App
 def main():
@@ -57,6 +63,11 @@ def main():
         threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
 
     if uploaded_file is not None:
+        # Check if the uploaded image is grayscale
+        if not is_grayscale(uploaded_file):
+            st.error("Uploaded image must be grayscale. Please choose a grayscale image.")
+            return
+
         st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
         # Create a temporary directory if it doesn't exist
@@ -108,7 +119,7 @@ def process_sample_image(sample_image):
 
         # Load the sample image
         img_path = os.path.join(os.getcwd(), sample_image)
-        img = image.load_img(img_path, target_size=(150, 150))
+        img = image.load_img(img_path, target_size=(150, 150), color_mode="grayscale")
         img.save(temp_path)
 
         # Make predictions
