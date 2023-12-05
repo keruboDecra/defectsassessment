@@ -37,7 +37,7 @@ def main():
     st.title("Defects Assessment App")
 
     # Display sample images
-    sample_images = ['Crazing.bmp', 'Inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
+    sample_images = ['Crazing.bmp', 'inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
     for sample_image in sample_images:
         st.image(sample_image, caption=sample_image, use_column_width=True)
 
