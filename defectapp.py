@@ -1,7 +1,6 @@
 # Importing necessary libraries
 import streamlit as st
 import os
-from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
@@ -42,7 +41,6 @@ def main():
     for col, sample_image in zip(sample_columns, sample_images):
         img_path = os.path.join(os.getcwd(), sample_image)
         col.image(img_path, caption=f"Use {sample_image}", use_column_width=True)
-        col.button(f"Use {sample_image}", key=f"use_{sample_image}", width=200)  # Set the width as needed
         if col.button(f"Use {sample_image}"):
             process_sample_image(sample_image)
 
