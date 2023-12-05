@@ -76,7 +76,7 @@ def main():
             # Set the threshold for alerting
             max_prob = max(prediction[0])
             if max_prob < threshold or max_prob_class == "Non-Metal":
-                st.warning("No relevant defect found. Please check the image again.")
+                st.warning("This is likely not a metallic surface, please check the image again.")
             else:
                 st.success(f"This metal surface has a defect of: {max_prob_class}")
 
