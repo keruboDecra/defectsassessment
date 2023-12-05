@@ -39,52 +39,51 @@ def main():
     # Display sample images
     sample_images = ['Crazing.bmp', 'inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
     for sample_image in sample_images:
-        st.image(sample_image, caption=sample_image, use_column_width=True)
+        if st.button(sample_image):
+            # Upload image through Streamlit
+            uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
 
-    # Upload image through Streamlit
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
+            # Add a sidebar for user inputs
+            with st.sidebar:
+                st.subheader("Threshold Settings")
+                threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
 
-    # Add a sidebar for user inputs
-    with st.sidebar:
-        st.subheader("Threshold Settings")
-        threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
+            if uploaded_file is not None:
+                st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
-    if uploaded_file is not None:
-        st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
+                # Create a temporary directory if it doesn't exist
+                temp_dir = 'temp'
+                os.makedirs(temp_dir, exist_ok=True)
 
-        # Create a temporary directory if it doesn't exist
-        temp_dir = 'temp'
-        os.makedirs(temp_dir, exist_ok=True)
+                # Create a path for the temporary image
+                filename = uploaded_file.name
+                temp_path = os.path.join(temp_dir, filename)
 
-        # Create a path for the temporary image
-        filename = uploaded_file.name
-        temp_path = os.path.join(temp_dir, filename)
+                uploaded_file.seek(0)
+                with open(temp_path, 'wb') as f:
+                    f.write(uploaded_file.read())
 
-        uploaded_file.seek(0)
-        with open(temp_path, 'wb') as f:
-            f.write(uploaded_file.read())
+                # Load the model
+                model = load_mobilenet_model()
 
-        # Load the model
-        model = load_mobilenet_model()
+                if model is not None:
+                    # Make predictions
+                    prediction = predict_defect(temp_path, model)
 
-        if model is not None:
-            # Make predictions
-            prediction = predict_defect(temp_path, model)
+                    # Assess the highest probability predicted and print out the class
+                    max_prob_class = assess_defect(prediction[0], classes)
 
-            # Assess the highest probability predicted and print out the class
-            max_prob_class = assess_defect(prediction[0], classes)
+                    # Set the threshold for alerting
+                    max_prob = max(prediction[0])
+                    if max_prob < threshold or max_prob_class == "Non-Metal":
+                        st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
+                    else:
+                        # Display the detailed prediction results only if it's a defect class
+                        st.subheader(f"Prediction Results for {filename}:")
+                        for i, class_name in enumerate(classes):
+                            st.write(f"{class_name}: {prediction[0][i]}")
 
-            # Set the threshold for alerting
-            max_prob = max(prediction[0])
-            if max_prob < threshold or max_prob_class == "Non-Metal":
-                st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
-            else:
-                # Display the detailed prediction results only if it's a defect class
-                st.subheader(f"Prediction Results for {filename}:")
-                for i, class_name in enumerate(classes):
-                    st.write(f"{class_name}: {prediction[0][i]}")
-
-                st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
+                        st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
