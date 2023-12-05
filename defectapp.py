@@ -18,7 +18,7 @@ def load_mobilenet_model():
 
 # Function to make predictions
 def predict_defect(image_path, model):
-    img = image.load_img(image_path, target_size=(150, 150), color_mode="grayscale")
+    img = image.load_img(image_path, target_size=(150, 150))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 
@@ -31,11 +31,11 @@ def assess_defect(prediction, classes):
     max_prob_class = classes[max_prob_index]
     return max_prob_class
 
-# Function to check if the image is grayscale
+# Function to check if an image is grayscale
 def is_grayscale(img_path):
-    img = image.load_img(img_path, target_size=(150, 150), color_mode="grayscale")
+    img = image.load_img(img_path)
     img_array = image.img_to_array(img)
-    return img_array.shape[-1] == 1
+    return len(img_array.shape) == 2  # Check if the image has only one channel
 
 # Streamlit App
 def main():
@@ -63,11 +63,6 @@ def main():
         threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
 
     if uploaded_file is not None:
-        # Check if the uploaded image is grayscale
-        if not is_grayscale(uploaded_file):
-            st.error("Uploaded image must be grayscale. Please choose a grayscale image.")
-            return
-
         st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
         # Create a temporary directory if it doesn't exist
@@ -82,27 +77,31 @@ def main():
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
 
-        # Load the model
-        model = load_mobilenet_model()
+        # Check if the image is grayscale
+        if not is_grayscale(temp_path):
+            st.warning("The uploaded image is not grayscale and will be rejected. Please upload a grayscale image.")
+        else:
+            # Load the model
+            model = load_mobilenet_model()
 
-        if model is not None:
-            # Make predictions
-            prediction = predict_defect(temp_path, model)
+            if model is not None:
+                # Make predictions
+                prediction = predict_defect(temp_path, model)
 
-            # Assess the highest probability predicted and print out the class
-            max_prob_class = assess_defect(prediction[0], classes)
+                # Assess the highest probability predicted and print out the class
+                max_prob_class = assess_defect(prediction[0], classes)
 
-            # Set the threshold for alerting
-            max_prob = max(prediction[0])
-            if max_prob < threshold or max_prob_class == "Non-Metal":
-                st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
-            else:
-                # Display the detailed prediction results only if it's a defect class
-                st.subheader(f"Prediction Results for {filename}:")
-                for i, class_name in enumerate(classes):
-                    st.write(f"{class_name}: {prediction[0][i]}")
+                # Set the threshold for alerting
+                max_prob = max(prediction[0])
+                if max_prob < threshold or max_prob_class == "Non-Metal":
+                    st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
+                else:
+                    # Display the detailed prediction results only if it's a defect class
+                    st.subheader(f"Prediction Results for {filename}:")
+                    for i, class_name in enumerate(classes):
+                        st.write(f"{class_name}: {prediction[0][i]}")
 
-                st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
+                    st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
 
 # Function to process a sample image
 def process_sample_image(sample_image):
@@ -119,7 +118,7 @@ def process_sample_image(sample_image):
 
         # Load the sample image
         img_path = os.path.join(os.getcwd(), sample_image)
-        img = image.load_img(img_path, target_size=(150, 150), color_mode="grayscale")
+        img = image.load_img(img_path, target_size=(150, 150))
         img.save(temp_path)
 
         # Make predictions
