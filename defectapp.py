@@ -80,7 +80,7 @@ def main():
 
         # Check if the image is grayscale
         if not is_grayscale(temp_path):
-            st.warning(f"{filename} is likely not a metallic surface, please check the image again.")
+            st.warning(f"The image, {filename}, is likely not a metallic surface, please check the image again.")
         else:
             # Load the model
             model = load_mobilenet_model()
@@ -95,7 +95,7 @@ def main():
                 # Set the threshold for alerting
                 max_prob = max(prediction[0])
                 if max_prob < threshold or max_prob_class == "Non-Metal":
-                    st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
+                    st.warning(f"The image, {filename}, is likely not a metallic surface, please check the image again.")
                 else:
                     # Display the detailed prediction results only if it's a defect class
                     st.subheader(f"Prediction Results for {filename}:")
