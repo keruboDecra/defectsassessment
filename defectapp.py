@@ -35,6 +35,9 @@ def assess_defect(prediction, classes):
 def main():
     st.title("Defects Assessment App")
 
+    # Subtitle
+    st.subheader("You can either use these images")
+
     # Display sample images horizontally
     sample_images = ['Crazing.bmp', 'inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
     sample_columns = st.columns(len(sample_images))
@@ -44,8 +47,8 @@ def main():
         if col.button(f"Use {sample_image}"):
             process_sample_image(sample_image)
 
-    # Upload image through Streamlit
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
+    # Or upload a file here
+    uploaded_file = st.file_uploader("Or upload a file here...", type=["jpg", "bmp"])  # Allow BMP files
 
     # Add a sidebar for user inputs
     with st.sidebar:
