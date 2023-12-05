@@ -38,7 +38,7 @@ def main():
 
     # Display sample images horizontally
     sample_images = ['Crazing.bmp', 'Inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
-    sample_columns = st.beta_columns(len(sample_images))
+    sample_columns = st.columns(len(sample_images))
     for col, sample_image in zip(sample_columns, sample_images):
         if col.button(f"Use {sample_image}"):
             process_sample_image(sample_image)
@@ -120,8 +120,4 @@ def process_sample_image(sample_image):
         st.success(f"This metal surface ({sample_image}) has a defect of: {max_prob_class}")
 
 # Define your classes
-classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-
-# Run the app
-if __name__ == '__main__':
-    main()
+classes = ['Crazing', 'Inclusion',
