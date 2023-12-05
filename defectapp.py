@@ -72,12 +72,13 @@ def main():
 
             # Assess the highest probability predicted and print out the class
             max_prob_class = assess_defect(prediction[0], classes)
-            st.success(f"This metal surface has a defect of: {max_prob_class}")
 
             # Set the threshold for alerting
             max_prob = max(prediction[0])
-            if max_prob < threshold:
+            if max_prob < threshold or max_prob_class == "Non-Metal":
                 st.warning("No relevant defect found. Please check the image again.")
+            else:
+                st.success(f"This metal surface has a defect of: {max_prob_class}")
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
