@@ -79,7 +79,7 @@ def main():
 
         # Check if the image is grayscale
         if not is_grayscale(temp_path):
-            st.warning("The uploaded image is not grayscale and will be rejected. Please upload a grayscale image.")
+            st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
         else:
             # Load the model
             model = load_mobilenet_model()
