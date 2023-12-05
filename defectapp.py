@@ -39,6 +39,11 @@ def main():
     # Upload image through Streamlit
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
 
+    # Add a sidebar for user inputs
+    with st.sidebar:
+        st.subheader("Threshold Settings")
+        threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
+
     if uploaded_file is not None:
         st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
@@ -64,9 +69,6 @@ def main():
             st.subheader("Prediction Results:")
             for i, class_name in enumerate(classes):
                 st.write(f"{class_name}: {prediction[0][i]}")
-
-            # Allow users to adjust the threshold
-            threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
 
             # Assess the highest probability predicted and print out the class
             max_prob_class = assess_defect(prediction[0], classes)
