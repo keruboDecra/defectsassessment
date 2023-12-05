@@ -36,49 +36,55 @@ def assess_defect(prediction, classes):
 def main():
     st.title("Defects Assessment App")
 
-    # Add a section for sample images
-    st.sidebar.subheader("Choose a Sample Image:")
-    sample_images = {
-        "Crazing": "Crazing.bmp",
-        "Inclusion": "Inclusion.jpg",
-        "Patches": "Patches.bmp",
-        "Pitted": "Pitted.bmp",
-        "Rolled": "Rolled.jpg",
-        "Scratches": "Scratches.bmp",
-    }
+    # Display sample images
+    sample_images = ['Crazing.bmp', 'Inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
+    for sample_image in sample_images:
+        st.image(sample_image, caption=sample_image, use_column_width=True)
 
-    sample_choice = st.sidebar.selectbox("Select a sample image:", list(sample_images.keys()))
-
-    # Display selected sample image
-    sample_path = os.path.join("samples", sample_images[sample_choice])
-    st.image(sample_path, caption=f"Sample Image: {sample_choice}", use_column_width=True)
+    # Upload image through Streamlit
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
 
     # Add a sidebar for user inputs
     with st.sidebar:
         st.subheader("Threshold Settings")
         threshold = st.slider("Select Threshold", min_value=0.0, max_value=1.0, value=0.95)
 
-    # Load the model
-    model = load_mobilenet_model()
+    if uploaded_file is not None:
+        st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
 
-    if model is not None:
-        # Make predictions for the selected sample image
-        prediction = predict_defect(sample_path, model)
+        # Create a temporary directory if it doesn't exist
+        temp_dir = 'temp'
+        os.makedirs(temp_dir, exist_ok=True)
 
-        # Assess the highest probability predicted and print out the class
-        max_prob_class = assess_defect(prediction[0], classes)
+        # Create a path for the temporary image
+        filename = uploaded_file.name
+        temp_path = os.path.join(temp_dir, filename)
 
-        # Set the threshold for alerting
-        max_prob = max(prediction[0])
-        if max_prob < threshold or max_prob_class == "Non-Metal":
-            st.warning(f"This is likely not a metallic surface ({sample_choice}), please check the image again.")
-        else:
-            # Display the detailed prediction results only if it's a defect class
-            st.subheader(f"Prediction Results for {sample_choice}:")
-            for i, class_name in enumerate(classes):
-                st.write(f"{class_name}: {prediction[0][i]}")
+        uploaded_file.seek(0)
+        with open(temp_path, 'wb') as f:
+            f.write(uploaded_file.read())
 
-            st.success(f"This metal surface ({sample_choice}) has a defect of: {max_prob_class}")
+        # Load the model
+        model = load_mobilenet_model()
+
+        if model is not None:
+            # Make predictions
+            prediction = predict_defect(temp_path, model)
+
+            # Assess the highest probability predicted and print out the class
+            max_prob_class = assess_defect(prediction[0], classes)
+
+            # Set the threshold for alerting
+            max_prob = max(prediction[0])
+            if max_prob < threshold or max_prob_class == "Non-Metal":
+                st.warning(f"This is likely not a metallic surface ({filename}), please check the image again.")
+            else:
+                # Display the detailed prediction results only if it's a defect class
+                st.subheader(f"Prediction Results for {filename}:")
+                for i, class_name in enumerate(classes):
+                    st.write(f"{class_name}: {prediction[0][i]}")
+
+                st.success(f"This metal surface ({filename}) has a defect of: {max_prob_class}")
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
