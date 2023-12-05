@@ -37,7 +37,7 @@ def main():
     st.title("Defects Assessment App")
 
     # Upload image through Streamlit
-    uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])
 
     if uploaded_file is not None:
         st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
@@ -68,8 +68,8 @@ def main():
             max_prob_class = assess_defect(prediction[0], classes)
             st.success(f"This metal surface has a defect of: {max_prob_class}")
 
-            # Set a threshold for alerting
-            threshold = 0.95 # Set your chosen threshold
+            # Set a threshold for alerting with an interactive slider
+            threshold = st.slider("Set the threshold", min_value=0.0, max_value=1.0, value=0.95, step=0.01)
             max_prob = max(prediction[0])
             if max_prob < threshold:
                 st.warning("No relevant defect found. Please check the image again.")
