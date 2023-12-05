@@ -32,10 +32,11 @@ def assess_defect(prediction, classes):
     return max_prob_class
 
 # Function to check if an image is grayscale
-def is_grayscale(img_path):
+def is_grayscale(img_path, min_unique_values=10, max_unique_values=256):
     img = image.load_img(img_path)
     img_array = image.img_to_array(img)
-    return len(img_array.shape) == 4  # Check if the image has only one channel
+    unique_values = np.unique(img_array)
+    return min_unique_values <= len(unique_values) <= max_unique_values
 
 # Streamlit App
 def main():
@@ -79,7 +80,7 @@ def main():
 
         # Check if the image is grayscale
         if not is_grayscale(temp_path):
-            st.warning(f"({filename}), is likely not a metallic surface , please check the image again.")
+            st.warning(f"{filename} is likely not a metallic surface, please check the image again.")
         else:
             # Load the model
             model = load_mobilenet_model()
