@@ -32,7 +32,7 @@ def assess_defect(prediction, classes):
     return max_prob_class
 
 # Function to check if an image is grayscale
-def is_grayscale(img_path, min_unique_values=100, max_unique_values=200):
+def is_grayscale(img_path, min_unique_values=0, max_unique_values=255):
     img = image.load_img(img_path)
     img_array = image.img_to_array(img)
     unique_values = np.unique(img_array)
