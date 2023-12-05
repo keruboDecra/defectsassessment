@@ -40,12 +40,10 @@ def main():
     sample_images = ['Crazing.bmp', 'inclusion.jpg', 'Patches.bmp', 'Pitted.bmp', 'Rolled.jpg', 'Scratches.bmp']
     sample_columns = st.columns(len(sample_images))
     for col, sample_image in zip(sample_columns, sample_images):
+        img_path = os.path.join(os.getcwd(), sample_image)
+        col.image(img_path, caption=f"Use {sample_image}", use_column_width=True)
         if col.button(f"Use {sample_image}"):
             process_sample_image(sample_image)
-
-        # Load the sample image for visualization
-        img_path = os.path.join(os.getcwd(), sample_image)
-        col.image(img_path, caption=sample_image, use_column_width=True, width=150)
 
     # Upload image through Streamlit
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
