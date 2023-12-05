@@ -43,6 +43,10 @@ def main():
         if col.button(f"Use {sample_image}"):
             process_sample_image(sample_image)
 
+        # Load the sample image for visualization
+        img_path = os.path.join(os.getcwd(), sample_image)
+        col.image(img_path, caption=sample_image, use_column_width=True, width=150)
+
     # Upload image through Streamlit
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "bmp"])  # Allow BMP files
 
@@ -125,4 +129,3 @@ classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
 # Run the app
 if __name__ == '__main__':
     main()
-
